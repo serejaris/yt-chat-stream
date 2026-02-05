@@ -14,6 +14,9 @@ app.use(cors());
 
 if (isProd) {
   app.use(express.static(join(__dirname, '..', 'client', 'dist')));
+  app.get('*', (req, res) => {
+    res.sendFile(join(__dirname, '..', 'client', 'dist', 'index.html'));
+  });
 }
 
 const server = createServer(app);
@@ -26,8 +29,8 @@ const io = new Server(server, {
 
 const users = new Map();
 
-function getUsersList() {
-  return Array.from(users.values());
+function getUserNames() {
+  return Array.from(users.values()).map((u) => u.name);
 }
 
 let messageId = 0;
@@ -35,17 +38,17 @@ let messageId = 0;
 io.on('connection', (socket) => {
   console.log(`Socket connected: ${socket.id}`);
 
-  socket.on('join', ({ name }) => {
+  socket.on('join', (name) => {
     users.set(socket.id, { name, joinedAt: Date.now() });
-    socket.broadcast.emit('user-joined', { name });
-    io.emit('users-list', getUsersList());
+    io.emit('message', { type: 'system', text: `${name} joined the chat` });
+    io.emit('users', getUserNames());
   });
 
-  socket.on('chat-message', ({ text }) => {
+  socket.on('message', (text) => {
     const user = users.get(socket.id);
     if (!user) return;
 
-    io.emit('chat-message', {
+    io.emit('message', {
       id: ++messageId,
       name: user.name,
       text,
@@ -56,21 +59,15 @@ io.on('connection', (socket) => {
   socket.on('typing', () => {
     const user = users.get(socket.id);
     if (!user) return;
-    socket.broadcast.emit('user-typing', { name: user.name });
-  });
-
-  socket.on('stop-typing', () => {
-    const user = users.get(socket.id);
-    if (!user) return;
-    socket.broadcast.emit('user-stop-typing', { name: user.name });
+    socket.broadcast.emit('typing', { name: user.name });
   });
 
   socket.on('disconnect', () => {
     const user = users.get(socket.id);
     if (user) {
       users.delete(socket.id);
-      io.emit('user-left', { name: user.name });
-      io.emit('users-list', getUsersList());
+      io.emit('message', { type: 'system', text: `${user.name} left the chat` });
+      io.emit('users', getUserNames());
     }
     console.log(`Socket disconnected: ${socket.id}`);
   });
