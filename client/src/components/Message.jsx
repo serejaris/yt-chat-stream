@@ -14,7 +14,12 @@ function Message({ message, isOwn }) {
 
   return (
     <div className={`message ${isOwn ? 'own' : 'other'}`}>
-      {!isOwn && <span className="message-name">{message.name}</span>}
+      {!isOwn && (
+        <span className="message-name">
+          {message.name}
+          {message.isMod && <span className="mod-badge-inline">MOD</span>}
+        </span>
+      )}
       <div className="message-bubble">{message.text}</div>
       <span className="message-time">{time}</span>
     </div>

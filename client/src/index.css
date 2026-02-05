@@ -322,6 +322,41 @@ body {
   background: #3b5de7;
 }
 
+/* ===== MOD Badge ===== */
+.mod-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.15);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mod-badge-inline {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.15);
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
+
+/* ===== Error Toast ===== */
+.error-toast {
+  padding: 0.5rem 1rem;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  font-size: 0.8rem;
+  text-align: center;
+  animation: fadeIn 0.2s ease-out;
+  border-top: 1px solid rgba(239, 68, 68, 0.3);
+}
+
 /* ===== Mobile Responsive ===== */
 @media (max-width: 768px) {
   .sidebar {

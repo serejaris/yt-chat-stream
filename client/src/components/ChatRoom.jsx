@@ -9,9 +9,11 @@ function ChatRoom({ userName, onLeave }) {
   const [users, setUsers] = useState([])
   const [input, setInput] = useState('')
   const [typingUsers, setTypingUsers] = useState([])
+  const [error, setError] = useState('')
   const socketRef = useRef(null)
   const messagesEndRef = useRef(null)
   const typingTimeoutRef = useRef(null)
+  const errorTimeoutRef = useRef(null)
 
   useEffect(() => {
     const socket = io(SERVER_URL)
@@ -37,6 +39,12 @@ function ChatRoom({ userName, onLeave }) {
       setTimeout(() => {
         setTypingUsers((prev) => prev.filter((n) => n !== name))
       }, 2000)
+    })
+
+    socket.on('error-message', (reason) => {
+      setError(reason)
+      clearTimeout(errorTimeoutRef.current)
+      errorTimeoutRef.current = setTimeout(() => setError(''), 3000)
     })
 
     return () => {
@@ -83,9 +91,10 @@ function ChatRoom({ userName, onLeave }) {
         </div>
         <div className="user-list">
           {users.map((user) => (
-            <div key={user} className="user-item">
+            <div key={user.name} className="user-item">
               <span className="online-dot" />
-              <span>{user}</span>
+              <span>{user.name}</span>
+              {user.isMod && <span className="mod-badge">MOD</span>}
             </div>
           ))}
         </div>
@@ -101,6 +110,7 @@ function ChatRoom({ userName, onLeave }) {
           ))}
           <div ref={messagesEndRef} />
         </div>
+        {error && <div className="error-toast">{error}</div>}
         <div className="typing-indicator">{typingText}</div>
         <div className="input-area">
           <input
@@ -109,6 +119,7 @@ function ChatRoom({ userName, onLeave }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            maxLength={500}
             autoFocus
           />
           <button onClick={sendMessage}>Send</button>
